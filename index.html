@@ -2,113 +2,239 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Virales - Executive Dashboard</title>
+<title>Virales - Growth Analytics Dashboard</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 body{background:#0B0D14;color:#E8E8ED;font-family:system-ui,sans-serif}
 .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.25rem}
-.card-accent{border-left:3px solid #F97316}
+.tab-active{background:linear-gradient(135deg,#F97316,#FB923C);color:white;box-shadow:0 4px 12px rgba(249,115,22,.3)}
+.tab-inactive{color:#9CA3AF}
+.tab-inactive:hover{color:white}
+.hidden{display:none!important}
 </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
 <div class="max-w-7xl mx-auto">
-<header class="flex items-center gap-3 mb-8">
+<!-- Header -->
+<header class="flex items-center gap-3 mb-6">
 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center"><span class="text-white text-lg">🔥</span></div>
-<div><h1 class="text-2xl font-bold">Virales</h1><p class="text-xs text-gray-400">Executive Growth Dashboard | MX</p></div>
+<div><h1 class="text-2xl font-bold">Virales</h1><p class="text-xs text-gray-400">Growth Analytics Dashboard | MX</p></div>
 <span id="ts" class="ml-auto text-xs text-gray-500"></span>
 </header>
-<div id="app" class="space-y-6"></div>
+<!-- Tabs -->
+<div class="flex gap-1 mb-6 p-1 rounded-xl border border-white/10 w-fit">
+<button onclick="showTab('campaign')" id="tab-campaign" class="px-4 py-2 rounded-xl text-sm font-medium tab-active">🔥 Por Campaña</button>
+<button onclick="showTab('executive')" id="tab-executive" class="px-4 py-2 rounded-xl text-sm font-medium tab-inactive">📊 Executive Report</button>
+<button onclick="showTab('playbook')" id="tab-playbook" class="px-4 py-2 rounded-xl text-sm font-medium tab-inactive">📖 Playbook</button>
 </div>
+<!-- Content -->
+<div id="tab-campaign-content"></div>
+<div id="tab-executive-content" class="hidden"></div>
+<div id="tab-playbook-content" class="hidden"></div>
+</div>
+
 <script>
-const F=n=>n>=1e6?`$${(n/1e6).toFixed(1)}M`:n>=1e3?`$${(n/1e3).toFixed(0)}K`:`$${n.toFixed(0)}`;
+function showTab(t){
+['campaign','executive','playbook'].forEach(x=>{
+document.getElementById('tab-'+x+'-content').classList.toggle('hidden',x!==t);
+document.getElementById('tab-'+x).className='px-4 py-2 rounded-xl text-sm font-medium '+(x===t?'tab-active':'tab-inactive');
+});
+}
+const F=n=>n>=1e6?`$${(n/1e6).toFixed(1)}M`:n>=1e3?`$${(n/1e3).toFixed(0)}K`:`$${Math.round(n)}`;
+
 async function main(){
-const d=await(await fetch('./data.json')).json();
-document.getElementById('ts').textContent=`Actualizado: ${new Date(d.generatedAt).toLocaleString('es-MX')}`;
+const [exec, camp] = await Promise.all([fetch('./data.json').then(r=>r.json()), fetch('./campaign-data.json').then(r=>r.json())]);
+document.getElementById('ts').textContent=`Actualizado: ${new Date(exec.generatedAt).toLocaleString('es-MX')}`;
+renderCampaign(camp);
+renderExecutive(exec);
+renderPlaybook();
+}
+
+function renderCampaign(d){
+const el=document.getElementById('tab-campaign-content');
+const imp=d.impact, can=d.cannibalization, ret=d.retention, pd=d.postDemand, st=d.stockout, cb=d.crossBasket, prod=d.products, rp=d.repeatPurchase, ds=d.demandShift;
+let h=`<p class="text-sm text-gray-400 mb-4">Mostrando: <span class="text-orange-400 font-medium">${d.sampleCampaign}</span></p>`;
+
+// KPIs
+h+=`<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+<div class="card text-center"><p class="text-xl font-bold text-orange-400">${F(imp.gmvTotal)}</p><p class="text-[10px] text-gray-400">GMV (sin IVA)</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-purple-400">${imp.totalOrders}/${(imp.unitsSold||0).toLocaleString()}</p><p class="text-[10px] text-gray-400">Órdenes/Units</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-red-400">${F(imp.discountSpend)}</p><p class="text-[10px] text-gray-400">Inversión Desc</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-green-400">${(imp.productOnlyRoi||0).toFixed(1)}x</p><p class="text-[10px] text-gray-400">ROI Producto</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-purple-400">${(imp.basketAdjustedRoi||0).toFixed(1)}x</p><p class="text-[10px] text-gray-400">ROI Full Basket</p></div>
+</div>`;
+
+// Cannibalization
+if(can&&can.data){
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Canibalización e Incrementalidad</h3>
+<div class="grid grid-cols-3 gap-3 mb-4">
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-orange-400">${F(can.incrementalGmv||0)}</p><p class="text-[10px] text-gray-400">GMV Incremental</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-purple-400">${(can.viralMultiplier||0).toFixed(1)}x</p><p class="text-[10px] text-gray-400">Multiplicador</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold ${(can.postViralVsBaseline||0)<-5?'text-red-400':'text-green-400'}">${(can.postViralVsBaseline||0)>=0?'+':''}${(can.postViralVsBaseline||0).toFixed(0)}%</p><p class="text-[10px] text-gray-400">Post vs Baseline</p></div>
+</div><canvas id="cannibChart" height="150"></canvas></div>`;
+}
+
+// Demand Shift
+if(ds){
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Demand Shift: Balance Total (61d)</h3>
+<div class="card ${ds.verdict==='NEUTRAL'?'border-l-orange-400':ds.verdict==='GENERATION'?'border-l-green-400':'border-l-red-400'}" style="border-left-width:3px">
+<p class="text-sm font-bold">${ds.verdict==='NEUTRAL'?'Demand Shift (Neutro)':ds.verdict==='GENERATION'?'Generación Neta':'Destrucción'}</p>
+<p class="text-xs text-gray-400 mt-1">Net Units: ${ds.netUnitsImpact>=0?'+':''}${ds.netUnitsImpact.toLocaleString()} (${ds.netUnitsPct>=0?'+':''}${ds.netUnitsPct.toFixed(1)}%) | Net GMV: ${ds.netGmvImpact>=0?'+':''}${F(ds.netGmvImpact)}</p>
+</div></div>`;
+}
+
+// Retention
+if(ret&&ret.segments){
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Retención Real por Segmento</h3>
+<p class="text-xs text-orange-400 mb-3">⚠ ${(ret.existingActivePct||0).toFixed(0)}% ya eran activos — solo ${ret.trulyNewCount||0} son verdaderamente nuevos</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">${(ret.segments||[]).map(s=>`<div class="p-3 bg-white/5 rounded-lg"><p class="text-xs font-medium ${s.userType==='TRULY_NEW'?'text-orange-400':s.userType==='REACTIVATED'?'text-purple-400':'text-green-400'}">${s.userType} (${s.cohortSize})</p><p class="text-sm mt-1">Ret 15d: ${(s.ret15dPct||0).toFixed(0)}% | 30d: ${(s.ret30dPct||0).toFixed(0)}%</p></div>`).join('')}</div></div>`;
+}
+
+// Repeat Purchase
+if(rp){
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Efecto Hábito: Recompra</h3>
+<div class="grid grid-cols-3 gap-3 text-center">
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-purple-400">${(rp.repeatRate||0).toFixed(0)}%</p><p class="text-[10px] text-gray-400">Recompra 60d</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-green-400">${(rp.fullPricePct||0).toFixed(0)}%</p><p class="text-[10px] text-gray-400">Full Price</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-green-400">${F(rp.fullPriceGmv||0)}</p><p class="text-[10px] text-gray-400">Revenue Full Price</p></div>
+</div></div>`;
+}
+
+// Cross-Basket
+if(cb){
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Cross-Basket</h3>
+<p class="text-xs text-orange-400 mb-3">De ${F(cb.totalCompanionGmv||0)} companion, solo ${(cb.trueCrossSellPct||0).toFixed(0)}% (${F(cb.gmvNewCategory||0)}) es true cross-sell. El ${(cb.habitualPct||0).toFixed(0)}% es compra habitual.</p>
+<div class="grid grid-cols-4 gap-3 text-center">
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-lg font-bold">${(cb.companionPenetration||0).toFixed(0)}%</p><p class="text-[10px] text-gray-400">Con companion</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-lg font-bold text-green-400">${F(cb.gmvNewCategory||0)}</p><p class="text-[10px] text-gray-400">True Cross-Sell</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-lg font-bold text-gray-400">${F(cb.gmvHabitual||0)}</p><p class="text-[10px] text-gray-400">Habitual</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-lg font-bold">${cb.newCategories||0}/${cb.totalCategories||0}</p><p class="text-[10px] text-gray-400">Cat nuevas/total</p></div>
+</div></div>`;
+}
+
+// Stockout + DOI
+if(st){
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Fricción Operativa</h3>
+<div class="grid grid-cols-4 gap-3 text-center mb-4">
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-red-400">${st.whWithStockout||0}</p><p class="text-[10px] text-gray-400">WH con Ruptura</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-orange-400">${(st.mixAffectedPct||0).toFixed(1)}%</p><p class="text-[10px] text-gray-400">Mix Afectado</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-green-400">${(st.unitsSold||0).toLocaleString()}</p><p class="text-[10px] text-gray-400">Units Vendidas</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-red-400">${F(st.opportunity?.estimatedLostGmv||0)}</p><p class="text-[10px] text-gray-400">GMV Lost</p></div>
+</div>`;
+if(st.cityBreakdown&&st.cityBreakdown.length){
+h+=`<table class="w-full text-sm"><thead><tr class="border-b border-white/10 text-[10px] text-gray-500"><th class="text-left py-1">Ciudad</th><th class="text-right py-1">Stock Pre</th><th class="text-right py-1">Stock Post</th><th class="text-right py-1">Cambio</th></tr></thead><tbody>`;
+st.cityBreakdown.forEach(c=>{const ch=c.stockBefore>0?((c.stockAfter-c.stockBefore)/c.stockBefore*100).toFixed(0):0;h+=`<tr class="border-b border-white/5"><td class="py-1 text-xs">${c.city}</td><td class="py-1 text-xs text-right">${c.stockBefore.toLocaleString()}</td><td class="py-1 text-xs text-right">${c.stockAfter.toLocaleString()}</td><td class="py-1 text-xs text-right ${ch<-20?'text-red-400':'text-green-400'}">${ch}%</td></tr>`;});
+h+=`</tbody></table>`;
+}
+if(st.doiData&&st.doiData.length){h+=`<canvas id="doiChart" height="120" class="mt-4"></canvas>`;}
+h+=`</div>`;
+}
+
+// Products
+if(prod&&prod.products){
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Análisis 360° de Productos (${prod.products.length})</h3>
+<table class="w-full text-sm"><thead><tr class="border-b border-white/10 text-[10px] text-gray-500"><th class="text-left py-1">Producto</th><th class="text-right py-1">GMV</th><th class="text-right py-1">Units</th><th class="text-right py-1">Desc%</th><th class="text-right py-1">Sell-Through</th></tr></thead><tbody>`;
+prod.products.forEach(p=>{h+=`<tr class="border-b border-white/5"><td class="py-1 text-xs">${(p.name||'').slice(0,35)}</td><td class="py-1 text-xs text-right">${F(p.gmv)}</td><td class="py-1 text-xs text-right">${p.units.toLocaleString()}</td><td class="py-1 text-xs text-right text-orange-400">${(p.discountPct||0).toFixed(0)}%</td><td class="py-1 text-xs text-right ${p.sellThroughPct>80?'text-red-400':'text-green-400'}">${(p.sellThroughPct||0).toFixed(0)}%</td></tr>`;});
+h+=`</tbody></table></div>`;
+}
+
+el.innerHTML=h;
+
+// Charts
+if(can&&can.data){
+const cd=can.data.sort((a,b)=>a.dayIndex-b.dayIndex);
+new Chart(document.getElementById('cannibChart'),{type:'line',data:{labels:cd.map(x=>x.dayIndex===0?'VIRAL':`T${x.dayIndex>0?'+':''}${x.dayIndex}`),datasets:[{data:cd.map(x=>can.baseline.avgGmv>0?(x.gmv/can.baseline.avgGmv*100):0),borderColor:'#F97316',borderWidth:2,fill:true,backgroundColor:'rgba(249,115,22,0.1)',tension:.3,pointRadius:0}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9CA3AF',font:{size:8}}},y:{ticks:{color:'#9CA3AF',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+}
+if(st&&st.doiData&&st.doiData.length){
+new Chart(document.getElementById('doiChart'),{type:'line',data:{labels:st.doiData.map(x=>x.dayIndex===0?'V':`${x.dayIndex}`),datasets:[{data:st.doiData.map(x=>x.doi),borderColor:'#8B5CF6',borderWidth:2,tension:.3,pointRadius:2,pointBackgroundColor:'#8B5CF6'}]},options:{responsive:true,plugins:{legend:{display:false},title:{display:true,text:'DOI (T-7 a T+7)',color:'#9CA3AF',font:{size:10}}},scales:{x:{ticks:{color:'#9CA3AF',font:{size:8}}},y:{ticks:{color:'#9CA3AF',callback:v=>v+'d'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+}
+}
+
+function renderExecutive(d){
+const el=document.getElementById('tab-executive-content');
 const k=d.programKpis,c=d.campaignResults,ds=d.demandShift,doi=d.doiProgram,ret=d.retention,rp=d.repeatPurchase,db=d.discountBreakdown;
 let h='';
 
-// === SCORECARD ===
-h+=`<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-<div class="card text-center"><p class="text-2xl font-bold text-orange-400">${F(k.totalGmv)}</p><p class="text-[10px] text-gray-400">GMV Total (${k.totalCampaigns} campañas)</p></div>
-<div class="card text-center"><p class="text-2xl font-bold text-red-400">${F(k.totalDiscount)}</p><p class="text-[10px] text-gray-400">Inversión Descuento</p></div>
-<div class="card text-center"><p class="text-2xl font-bold">${k.avgRoi.toFixed(1)}x</p><p class="text-[10px] text-gray-400">ROI Promedio</p></div>
-<div class="card text-center"><p class="text-2xl font-bold text-purple-400">${k.avgMultiplier.toFixed(1)}x</p><p class="text-[10px] text-gray-400">Multiplicador vs Baseline</p></div>
-<div class="card text-center"><p class="text-2xl font-bold text-red-400">${F(k.totalLostGmv||0)}</p><p class="text-[10px] text-gray-400">GMV Potencial Perdido</p><p class="text-[10px] text-gray-500">+${(k.lostGmvPct||0).toFixed(1)}% upside</p></div>
+h+=`<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+<div class="card text-center"><p class="text-2xl font-bold text-orange-400">${F(k.totalGmv)}</p><p class="text-[10px] text-gray-400">GMV Total (${k.totalCampaigns})</p></div>
+<div class="card text-center"><p class="text-2xl font-bold text-red-400">${F(k.totalDiscount)}</p><p class="text-[10px] text-gray-400">Inversión</p></div>
+<div class="card text-center"><p class="text-2xl font-bold">${k.avgRoi.toFixed(1)}x</p><p class="text-[10px] text-gray-400">ROI</p></div>
+<div class="card text-center"><p class="text-2xl font-bold text-purple-400">${k.avgMultiplier.toFixed(1)}x</p><p class="text-[10px] text-gray-400">Multiplier</p></div>
+<div class="card text-center"><p class="text-2xl font-bold text-red-400">${F(k.totalLostGmv||0)}</p><p class="text-[10px] text-gray-400">Lost GMV (+${(k.lostGmvPct||0).toFixed(1)}%)</p></div>
 </div>`;
 
-// === DEMAND SHIFT ===
-h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Demand Shift: ¿Generación o Migración de Demanda?</h3>
-<div class="grid grid-cols-3 gap-4 mb-4">
-<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${ds.dsGenerationCount}</p><p class="text-[10px] text-gray-400">Generación (+5%)</p></div>
-<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-orange-400">${ds.dsNeutralCount}</p><p class="text-[10px] text-gray-400">Neutro (±5%)</p></div>
-<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-red-400">${ds.dsDestructionCount}</p><p class="text-[10px] text-gray-400">Destrucción (-5%)</p></div>
-</div>
-<canvas id="dsChart" height="200"></canvas>
-<p class="text-xs text-gray-500 mt-2">Barras: Net Units % vs esperado sin viral. Verde=genera, Naranja=neutro, Rojo=destruye.</p>
-</div>`;
+// Demand Shift Program
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Demand Shift del Programa</h3>
+<div class="grid grid-cols-3 gap-3 mb-4">
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${ds.dsGenerationCount}</p><p class="text-[10px] text-gray-400">Generación</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-orange-400">${ds.dsNeutralCount}</p><p class="text-[10px] text-gray-400">Neutro</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-red-400">${ds.dsDestructionCount}</p><p class="text-[10px] text-gray-400">Destrucción</p></div>
+</div><canvas id="execDsChart" height="200"></canvas></div>`;
 
-// === DOI ===
-h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Supply: Days of Inventory (DOI)</h3>
-<div class="grid grid-cols-4 gap-3 text-center">
-<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold">${doi.avgDoiPre}d</p><p class="text-[10px] text-gray-400">DOI Pre-Viral</p></div>
-<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold">${doi.avgDoiPost}d</p><p class="text-[10px] text-gray-400">DOI Post +7d</p></div>
+// DOI
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Supply: DOI + Cobertura</h3>
+<div class="grid grid-cols-5 gap-3 text-center">
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold">${doi.avgDoiPre}d</p><p class="text-[10px] text-gray-400">DOI Pre</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold">${doi.avgDoiPost}d</p><p class="text-[10px] text-gray-400">DOI Post</p></div>
 <div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold ${doi.doiDelta<-5?'text-orange-400':'text-green-400'}">${doi.doiDelta>=0?'+':''}${doi.doiDelta}d</p><p class="text-[10px] text-gray-400">Delta</p></div>
-<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold ${doi.campaignsWithDoiRisk>0?'text-red-400':'text-green-400'}">${doi.campaignsWithDoiRisk}</p><p class="text-[10px] text-gray-400">Riesgo DOI &lt;14d</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-red-400">${F(k.totalLostGmv||0)}</p><p class="text-[10px] text-gray-400">Lost GMV</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-orange-400">+${(k.lostGmvPct||0).toFixed(1)}%</p><p class="text-[10px] text-gray-400">Upside si 100%</p></div>
 </div></div>`;
 
-// === RETENTION ===
-h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Usuarios: Composición y Calidad de Adquisición</h3>
-<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${ret.existingPct}%</p><p class="text-[10px] text-gray-400">Existentes Activos</p><p class="text-[10px] text-gray-500">No atribuible al viral</p></div>
-<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-orange-400">${ret.trulyNewPct}%</p><p class="text-[10px] text-gray-400">Verdaderamente Nuevos</p></div>
-<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-red-400">${ret.qualityGap}pp</p><p class="text-[10px] text-gray-400">Gap vs Benchmark</p><p class="text-[10px] text-gray-500">Viral ${ret.newRetention30d}% vs Org ${ret.benchmarkRetention30d}%</p></div>
-</div></div>`;
-
-// === REPEAT PURCHASE ===
-h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Efecto Hábito: Recompra del Mismo Producto</h3>
-<div class="grid grid-cols-3 gap-4 text-center">
-<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-purple-400">${rp.repeatRate}%</p><p class="text-[10px] text-gray-400">Tasa Recompra 60d</p></div>
-<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-green-400">${rp.fullPricePct}%</p><p class="text-[10px] text-gray-400">Recompras Full Price</p></div>
-<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-green-400">${F(rp.fullPriceGmvK*1000)}</p><p class="text-[10px] text-gray-400">Revenue Full-Price</p></div>
+// Users + Habit
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Usuarios y Hábito</h3>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${ret.existingPct}%</p><p class="text-[10px] text-gray-400">Ya activos</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-orange-400">${ret.trulyNewPct}%</p><p class="text-[10px] text-gray-400">Nuevos reales</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-red-400">${ret.qualityGap}pp</p><p class="text-[10px] text-gray-400">Gap calidad</p></div>
 </div>
-<p class="text-xs text-gray-500 mt-3">El 58% de las recompras del mismo producto son sin descuento — el viral crea hábito que genera revenue puro.</p>
-</div>`;
+<div class="grid grid-cols-3 gap-3 mt-3">
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-purple-400">${rp.repeatRate}%</p><p class="text-[10px] text-gray-400">Recompra 60d</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${rp.fullPricePct}%</p><p class="text-[10px] text-gray-400">Full Price</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${F(rp.fullPriceGmvK*1000)}</p><p class="text-[10px] text-gray-400">Revenue Pure</p></div>
+</div></div>`;
 
-// === DISCOUNT BREAKDOWN ===
+// Discount Breakdown
 const dbItems=Object.entries(db).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
 const dbColors={commercial:'#F97316',makers:'#8B5CF6',monetization:'#3B82F6',blackbox:'#6B7280',rappi:'#EF4444',partners:'#10B981',shrinkage:'#FBBF24'};
-const dbLabels={commercial:'Commercial',makers:'Makers',monetization:'Monetización',blackbox:'Blackbox',rappi:'Rappi',partners:'Partners',shrinkage:'Shrinkage'};
-h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Inversión en Descuento: ¿Quién Paga?</h3>
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3">${dbItems.map(([key,val])=>`<div class="p-3 bg-white/5 rounded-lg text-center" style="border-top:3px solid ${dbColors[key]||'#6B7280'}"><p class="text-lg font-bold">${F(val)}</p><p class="text-[10px]" style="color:${dbColors[key]||'#6B7280'}">${dbLabels[key]||key}</p><p class="text-[10px] text-gray-500">${(val/k.totalDiscount*100).toFixed(0)}%</p></div>`).join('')}</div>
-<p class="text-xs text-gray-500 mt-3">${db.rappi===0?'Rappi no invierte directamente — 100% financiado por makers/partners.':''}</p>
-</div>`;
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">¿Quién Paga el Descuento?</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">${dbItems.map(([key,val])=>`<div class="p-3 bg-white/5 rounded-lg text-center" style="border-top:3px solid ${dbColors[key]||'#6B7280'}"><p class="text-lg font-bold">${F(val)}</p><p class="text-[10px]" style="color:${dbColors[key]||'#6B7280'}">${key}</p><p class="text-[10px] text-gray-500">${(val/k.totalDiscount*100).toFixed(0)}%</p></div>`).join('')}</div>
+<p class="text-xs text-gray-500 mt-3">${db.rappi===0?'Rappi no invierte directamente — 100% financiado por makers/partners.':''}</p></div>`;
 
-// === CAMPAIGN TABLE ===
-h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Detalle por Campaña (${c.length})</h3>
-<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-white/10 text-[10px] text-gray-500">
-<th class="text-left py-2">Campaña</th><th class="text-left py-2">Fecha</th><th class="text-right py-2">GMV</th><th class="text-right py-2">Desc</th><th class="text-right py-2">ROI</th><th class="text-right py-2">Mult</th><th class="text-right py-2">Post%</th><th class="text-right py-2">DS%</th><th class="text-right py-2">Tipo</th>
-</tr></thead><tbody>`;
-[...c].sort((a,b)=>b.gmv-a.gmv).forEach(r=>{
-const rc=r.roi>2.5?'text-green-400':r.roi>1.5?'text-orange-400':'text-red-400';
-const pc=r.postDeclinePct>=-10?'text-green-400':'text-red-400';
-const dc=r.dsVerdict==='GENERATION'?'text-green-400':r.dsVerdict==='DESTRUCTION'?'text-red-400':'text-orange-400';
-h+=`<tr class="border-b border-white/5 hover:bg-white/5"><td class="py-1.5 text-xs">${r.name}</td><td class="py-1.5 text-xs text-gray-400">${r.date}</td><td class="py-1.5 text-xs text-right">${F(r.gmv)}</td><td class="py-1.5 text-xs text-right text-gray-400">${F(r.discount)}</td><td class="py-1.5 text-xs text-right ${rc}">${r.roi.toFixed(1)}x</td><td class="py-1.5 text-xs text-right">${r.multiplier.toFixed(0)}x</td><td class="py-1.5 text-xs text-right ${pc}">${r.postDeclinePct>=0?'+':''}${r.postDeclinePct.toFixed(0)}%</td><td class="py-1.5 text-xs text-right ${dc}">${r.dsNetUnitsPct>=0?'+':''}${r.dsNetUnitsPct.toFixed(0)}%</td><td class="py-1.5 text-xs text-right ${dc}">${r.dsVerdict==='GENERATION'?'Gen':r.dsVerdict==='DESTRUCTION'?'Dest':'Neutro'}</td></tr>`;
-});
+// Campaign Table
+h+=`<div class="card mb-6"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Todas las Campañas (${c.length})</h3>
+<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-white/10 text-[10px] text-gray-500"><th class="text-left py-2">Campaña</th><th class="text-right py-2">GMV</th><th class="text-right py-2">ROI</th><th class="text-right py-2">Mult</th><th class="text-right py-2">Post%</th><th class="text-right py-2">DS%</th></tr></thead><tbody>`;
+[...c].sort((a,b)=>b.gmv-a.gmv).forEach(r=>{const dc=r.dsVerdict==='GENERATION'?'text-green-400':r.dsVerdict==='DESTRUCTION'?'text-red-400':'text-orange-400';h+=`<tr class="border-b border-white/5"><td class="py-1 text-xs">${r.name}</td><td class="py-1 text-xs text-right">${F(r.gmv)}</td><td class="py-1 text-xs text-right">${r.roi.toFixed(1)}x</td><td class="py-1 text-xs text-right">${r.multiplier.toFixed(0)}x</td><td class="py-1 text-xs text-right ${r.postDeclinePct<-10?'text-red-400':'text-green-400'}">${r.postDeclinePct.toFixed(0)}%</td><td class="py-1 text-xs text-right ${dc}">${r.dsNetUnitsPct>=0?'+':''}${r.dsNetUnitsPct.toFixed(0)}%</td></tr>`;});
 h+=`</tbody></table></div></div>`;
 
-// === CONCLUSION ===
-h+=`<div class="card card-accent"><h3 class="text-sm font-bold mb-3">Conclusión del Análisis</h3>
-<p class="text-xs text-gray-300 leading-relaxed">Los virales funcionan como <strong>herramienta de activación comercial</strong>, no de crecimiento. En unidades netas el impacto es neutro (demand shift), pero generan valor a través de: basket uplift (+15%), efecto hábito (39% recompra, 58% full price), y negociaciones con makers (inversión 100% del fabricante). El principal riesgo es la canibalización post-viral (-28% promedio en venta diaria), mitigada parcialmente por la recompra a full price posterior.</p>
-</div>`;
+// Conclusion
+h+=`<div class="card" style="border-left:3px solid #F97316"><h3 class="text-sm font-bold mb-2">Conclusión</h3><p class="text-xs text-gray-300 leading-relaxed">Los virales funcionan como herramienta de activación comercial, no de crecimiento. En unidades netas el impacto es neutro (demand shift), pero generan valor a través de: basket uplift (+15%), efecto hábito (39% recompra, 58% full price), y negociaciones con makers (inversión 100% del fabricante). El principal riesgo es la canibalización post-viral (-28% promedio), mitigada parcialmente por recompra full price posterior.</p></div>`;
 
-document.getElementById('app').innerHTML=h;
+el.innerHTML=h;
 
-// Demand Shift Chart
+// DS Chart
 const sorted=[...c].sort((a,b)=>b.dsNetUnitsPct-a.dsNetUnitsPct).slice(0,25);
-new Chart(document.getElementById('dsChart'),{type:'bar',data:{labels:sorted.map(x=>x.name.slice(0,12)),datasets:[{data:sorted.map(x=>x.dsNetUnitsPct),backgroundColor:sorted.map(x=>x.dsNetUnitsPct>5?'#10B981':x.dsNetUnitsPct<-5?'#EF4444':'#F97316'),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9CA3AF',font:{size:8},maxRotation:45}},y:{ticks:{color:'#9CA3AF',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+new Chart(document.getElementById('execDsChart'),{type:'bar',data:{labels:sorted.map(x=>x.name.slice(0,10)),datasets:[{data:sorted.map(x=>x.dsNetUnitsPct),backgroundColor:sorted.map(x=>x.dsNetUnitsPct>5?'#10B981':x.dsNetUnitsPct<-5?'#EF4444':'#F97316'),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9CA3AF',font:{size:7},maxRotation:45}},y:{ticks:{color:'#9CA3AF',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
 }
-main().catch(e=>{document.getElementById('app').innerHTML=`<div class="card text-red-400">Error: ${e.message}</div>`});
+
+function renderPlaybook(){
+const el=document.getElementById('tab-playbook-content');
+const sections=[
+{t:'¿Qué es un Viral Deal?',c:'Campaña de descuento agresivo en 1 día. Objetivo: pico de demanda. Descuento financiado por el maker.'},
+{t:'Métricas Clave',c:'GMV (sin IVA, COUNT_TO_GMV=TRUE) | ROI = GMV/Descuento | Net Incremental = GMV viral - baseline - canibalización | Multiplicador = GMV viral / baseline diario'},
+{t:'Canibalización',c:'Compara venta post-viral vs baseline. Si post < baseline → canibalización. El "Test de Stockeo" compara cohorte viral vs control para ver si es patrón calendario.'},
+{t:'Demand Shift',c:'Balance total: 30d pre + viral + 30d post vs esperado sin viral. Si ±5% = neutro (solo movió demanda en el tiempo). >+5% = generación. <-5% = destrucción.'},
+{t:'Usuarios',c:'~95% ya eran activos. ~2% verdaderamente nuevos. Retención de nuevos viral (~46%) vs benchmark orgánico (~81%) = gap de -35pp.'},
+{t:'Repeat Purchase',c:'39% recompra el mismo producto en 60d. 58% de esas recompras son a full price = valor puro del viral.'},
+{t:'DOI (Days of Inventory)',c:'Stock / Venta diaria promedio. <7d = desabasto. 15-45d = saludable. >45d = sobrestock.'},
+{t:'Cross-Basket',c:'34% del companion es true cross-sell (categoría nueva). 66% es compra habitual no atribuible al viral.'},
+{t:'Lost GMV',c:'Estimación de venta perdida por WH sin stock. Fórmula: capacidad WH sin stock × tasa conversión × avg ticket.'},
+];
+el.innerHTML=`<div class="max-w-3xl mx-auto space-y-4">${sections.map(s=>`<div class="card"><h3 class="text-sm font-bold text-orange-400 mb-2">${s.t}</h3><p class="text-xs text-gray-300 leading-relaxed">${s.c}</p></div>`).join('')}</div>`;
+}
+
+main().catch(e=>{document.getElementById('tab-campaign-content').innerHTML=`<div class="card text-red-400">Error: ${e.message}</div>`;});
 </script>
 </body>
 </html>
