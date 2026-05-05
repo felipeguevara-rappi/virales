@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-05-05T22:55:00.000Z",
+  "programKpis": {
+    "totalCampaigns": 42,
+    "totalGmv": 5720000,
+    "totalDiscount": 3200000,
+    "avgRoi": 1.79,
+    "avgMultiplier": 6.2
+  },
+  "campaignResults": [
+    {"name": "VIRAL_DEAL_GRUPOMODELO_220126", "date": "2026-01-22", "gmv": 1112942, "units": 25461, "orders": 3324, "discount": 627759, "roi": 1.77, "multiplier": 9.3, "postDeclinePct": -28.2},
+    {"name": "VIRAL_DEAL_GEPP_29-300126", "date": "2026-01-29", "gmv": 12480, "units": 412, "orders": 182, "discount": 4750, "roi": 2.63, "multiplier": 3.1, "postDeclinePct": -5.4},
+    {"name": "VIRAL_DEAL_SANRAFAEL_020226", "date": "2026-02-02", "gmv": 92787, "units": 949, "orders": 591, "discount": 49060, "roi": 1.89, "multiplier": 4.7, "postDeclinePct": -12.3},
+    {"name": "VIRAL_DEAL_BACHOCO_05-080226", "date": "2026-02-05", "gmv": 184822, "units": 794, "orders": 377, "discount": 113616, "roi": 1.63, "multiplier": 7.8, "postDeclinePct": -35.6},
+    {"name": "VIRAL_DEAL_BARCEL_060226", "date": "2026-02-06", "gmv": 248476, "units": 3581, "orders": 1418, "discount": 152299, "roi": 1.63, "multiplier": 5.2, "postDeclinePct": -18.7},
+    {"name": "VIRAL_DEAL_GUACAMOLE_070226", "date": "2026-02-07", "gmv": 61331, "units": 4601, "orders": 1297, "discount": 24900, "roi": 2.46, "multiplier": 4.1, "postDeclinePct": -8.9},
+    {"name": "VIRAL_DEAL_HERSHEYS_13-140226", "date": "2026-02-13", "gmv": 215632, "units": 2215, "orders": 640, "discount": 160743, "roi": 1.34, "multiplier": 6.4, "postDeclinePct": -22.1},
+    {"name": "VIRAL_DEAL_BIMBO_070326", "date": "2026-03-07", "gmv": 123894, "units": 4445, "orders": 986, "discount": 70411, "roi": 1.76, "multiplier": 3.8, "postDeclinePct": -15.4},
+    {"name": "VIRAL_DEAL_Holanda_160426", "date": "2026-04-16", "gmv": 106067, "units": 3148, "orders": 765, "discount": 52958, "roi": 2.0, "multiplier": 5.6, "postDeclinePct": -41.0},
+    {"name": "VIRAL_DEAL_MODELO_290426", "date": "2026-04-29", "gmv": 264534, "units": 2071, "orders": 1133, "discount": 161776, "roi": 1.64, "multiplier": 8.1, "postDeclinePct": -19.3}
+  ]
+}
