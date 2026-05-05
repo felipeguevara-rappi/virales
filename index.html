@@ -1,102 +1,114 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virales - Growth Analytics</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { background: #0B0D14; color: #E8E8ED; font-family: system-ui, -apple-system, sans-serif; }
-    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Virales - Executive Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+body{background:#0B0D14;color:#E8E8ED;font-family:system-ui,sans-serif}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.25rem}
+.card-accent{border-left:3px solid #F97316}
+</style>
 </head>
-<body class="min-h-screen p-6 md:p-10">
-  <div id="app" class="max-w-6xl mx-auto">
-    <div class="flex items-center gap-3 mb-8">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-      </div>
-      <div>
-        <h1 class="text-2xl font-bold">Virales</h1>
-        <p class="text-xs text-gray-400">Growth Analytics Dashboard | MX</p>
-      </div>
-      <span id="lastUpdated" class="ml-auto text-xs text-gray-500"></span>
-    </div>
-    <div id="loading" class="card text-center py-20 text-gray-400">Cargando datos...</div>
-    <div id="content" class="hidden space-y-6"></div>
-  </div>
+<body class="min-h-screen p-4 md:p-8">
+<div class="max-w-7xl mx-auto">
+<header class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center"><span class="text-white text-lg">🔥</span></div>
+<div><h1 class="text-2xl font-bold">Virales</h1><p class="text-xs text-gray-400">Executive Growth Dashboard | MX</p></div>
+<span id="ts" class="ml-auto text-xs text-gray-500"></span>
+</header>
+<div id="app" class="space-y-6"></div>
+</div>
+<script>
+const F=n=>n>=1e6?`$${(n/1e6).toFixed(1)}M`:n>=1e3?`$${(n/1e3).toFixed(0)}K`:`$${n.toFixed(0)}`;
+async function main(){
+const d=await(await fetch('./data.json')).json();
+document.getElementById('ts').textContent=`Actualizado: ${new Date(d.generatedAt).toLocaleString('es-MX')}`;
+const k=d.programKpis,c=d.campaignResults,ds=d.demandShift,doi=d.doiProgram,ret=d.retention,rp=d.repeatPurchase,db=d.discountBreakdown;
+let h='';
 
-  <script>
-    async function loadData() {
-      try {
-        const res = await fetch('./data.json');
-        const data = await res.json();
-        render(data);
-      } catch(e) {
-        document.getElementById('loading').innerHTML = 'Error cargando datos. Asegúrate de que data.json existe.';
-      }
-    }
+// === SCORECARD ===
+h+=`<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+<div class="card text-center"><p class="text-2xl font-bold text-orange-400">${F(k.totalGmv)}</p><p class="text-[10px] text-gray-400">GMV Total (${k.totalCampaigns} campañas)</p></div>
+<div class="card text-center"><p class="text-2xl font-bold text-red-400">${F(k.totalDiscount)}</p><p class="text-[10px] text-gray-400">Inversión Descuento</p></div>
+<div class="card text-center"><p class="text-2xl font-bold">${k.avgRoi.toFixed(1)}x</p><p class="text-[10px] text-gray-400">ROI Promedio</p></div>
+<div class="card text-center"><p class="text-2xl font-bold text-purple-400">${k.avgMultiplier.toFixed(1)}x</p><p class="text-[10px] text-gray-400">Multiplicador vs Baseline</p></div>
+<div class="card text-center"><p class="text-2xl font-bold text-red-400">${F(k.totalLostGmv||0)}</p><p class="text-[10px] text-gray-400">GMV Potencial Perdido</p><p class="text-[10px] text-gray-500">+${(k.lostGmvPct||0).toFixed(1)}% upside</p></div>
+</div>`;
 
-    function fmt(n) { return n >= 1000000 ? `$${(n/1000000).toFixed(1)}M` : n >= 1000 ? `$${(n/1000).toFixed(0)}K` : `$${n.toFixed(0)}`; }
+// === DEMAND SHIFT ===
+h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Demand Shift: ¿Generación o Migración de Demanda?</h3>
+<div class="grid grid-cols-3 gap-4 mb-4">
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${ds.dsGenerationCount}</p><p class="text-[10px] text-gray-400">Generación (+5%)</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-orange-400">${ds.dsNeutralCount}</p><p class="text-[10px] text-gray-400">Neutro (±5%)</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-red-400">${ds.dsDestructionCount}</p><p class="text-[10px] text-gray-400">Destrucción (-5%)</p></div>
+</div>
+<canvas id="dsChart" height="200"></canvas>
+<p class="text-xs text-gray-500 mt-2">Barras: Net Units % vs esperado sin viral. Verde=genera, Naranja=neutro, Rojo=destruye.</p>
+</div>`;
 
-    function render(data) {
-      document.getElementById('loading').classList.add('hidden');
-      document.getElementById('content').classList.remove('hidden');
-      document.getElementById('lastUpdated').textContent = `Actualizado: ${new Date(data.generatedAt).toLocaleString('es-MX')}`;
+// === DOI ===
+h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Supply: Days of Inventory (DOI)</h3>
+<div class="grid grid-cols-4 gap-3 text-center">
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold">${doi.avgDoiPre}d</p><p class="text-[10px] text-gray-400">DOI Pre-Viral</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold">${doi.avgDoiPost}d</p><p class="text-[10px] text-gray-400">DOI Post +7d</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold ${doi.doiDelta<-5?'text-orange-400':'text-green-400'}">${doi.doiDelta>=0?'+':''}${doi.doiDelta}d</p><p class="text-[10px] text-gray-400">Delta</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold ${doi.campaignsWithDoiRisk>0?'text-red-400':'text-green-400'}">${doi.campaignsWithDoiRisk}</p><p class="text-[10px] text-gray-400">Riesgo DOI &lt;14d</p></div>
+</div></div>`;
 
-      const kpis = data.programKpis;
-      const campaigns = data.campaignResults || [];
+// === RETENTION ===
+h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Usuarios: Composición y Calidad de Adquisición</h3>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-green-400">${ret.existingPct}%</p><p class="text-[10px] text-gray-400">Existentes Activos</p><p class="text-[10px] text-gray-500">No atribuible al viral</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-orange-400">${ret.trulyNewPct}%</p><p class="text-[10px] text-gray-400">Verdaderamente Nuevos</p></div>
+<div class="p-3 bg-white/5 rounded-lg text-center"><p class="text-xl font-bold text-red-400">${ret.qualityGap}pp</p><p class="text-[10px] text-gray-400">Gap vs Benchmark</p><p class="text-[10px] text-gray-500">Viral ${ret.newRetention30d}% vs Org ${ret.benchmarkRetention30d}%</p></div>
+</div></div>`;
 
-      let html = '';
+// === REPEAT PURCHASE ===
+h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Efecto Hábito: Recompra del Mismo Producto</h3>
+<div class="grid grid-cols-3 gap-4 text-center">
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-purple-400">${rp.repeatRate}%</p><p class="text-[10px] text-gray-400">Tasa Recompra 60d</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-green-400">${rp.fullPricePct}%</p><p class="text-[10px] text-gray-400">Recompras Full Price</p></div>
+<div class="p-3 bg-white/5 rounded-lg"><p class="text-xl font-bold text-green-400">${F(rp.fullPriceGmvK*1000)}</p><p class="text-[10px] text-gray-400">Revenue Full-Price</p></div>
+</div>
+<p class="text-xs text-gray-500 mt-3">El 58% de las recompras del mismo producto son sin descuento — el viral crea hábito que genera revenue puro.</p>
+</div>`;
 
-      // KPIs
-      html += `<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div class="card text-center"><p class="text-2xl font-bold text-orange-400">${fmt(kpis.totalGmv)}</p><p class="text-xs text-gray-400">GMV Total</p><p class="text-xs text-gray-500">${kpis.totalCampaigns} campañas</p></div>
-        <div class="card text-center"><p class="text-2xl font-bold text-red-400">${fmt(kpis.totalDiscount)}</p><p class="text-xs text-gray-400">Inversión Descuento</p></div>
-        <div class="card text-center"><p class="text-2xl font-bold text-white">${kpis.avgRoi.toFixed(1)}x</p><p class="text-xs text-gray-400">ROI Promedio</p></div>
-        <div class="card text-center"><p class="text-2xl font-bold text-white">${kpis.avgMultiplier.toFixed(1)}x</p><p class="text-xs text-gray-400">Multiplicador vs Baseline</p></div>
-        <div class="card text-center"><p class="text-2xl font-bold text-purple-400">${campaigns.length}</p><p class="text-xs text-gray-400">Campañas Analizadas</p></div>
-      </div>`;
+// === DISCOUNT BREAKDOWN ===
+const dbItems=Object.entries(db).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+const dbColors={commercial:'#F97316',makers:'#8B5CF6',monetization:'#3B82F6',blackbox:'#6B7280',rappi:'#EF4444',partners:'#10B981',shrinkage:'#FBBF24'};
+const dbLabels={commercial:'Commercial',makers:'Makers',monetization:'Monetización',blackbox:'Blackbox',rappi:'Rappi',partners:'Partners',shrinkage:'Shrinkage'};
+h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Inversión en Descuento: ¿Quién Paga?</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">${dbItems.map(([key,val])=>`<div class="p-3 bg-white/5 rounded-lg text-center" style="border-top:3px solid ${dbColors[key]||'#6B7280'}"><p class="text-lg font-bold">${F(val)}</p><p class="text-[10px]" style="color:${dbColors[key]||'#6B7280'}">${dbLabels[key]||key}</p><p class="text-[10px] text-gray-500">${(val/k.totalDiscount*100).toFixed(0)}%</p></div>`).join('')}</div>
+<p class="text-xs text-gray-500 mt-3">${db.rappi===0?'Rappi no invierte directamente — 100% financiado por makers/partners.':''}</p>
+</div>`;
 
-      // Campaign Table
-      html += `<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Detalle por Campaña</h3>
-        <div class="overflow-x-auto"><table class="w-full text-sm">
-        <thead><tr class="border-b border-white/10 text-xs text-gray-500">
-          <th class="text-left py-2">Campaña</th><th class="text-left py-2">Fecha</th><th class="text-right py-2">GMV</th><th class="text-right py-2">Descuento</th><th class="text-right py-2">ROI</th><th class="text-right py-2">Mult.</th><th class="text-right py-2">Post %</th>
-        </tr></thead><tbody>`;
+// === CAMPAIGN TABLE ===
+h+=`<div class="card"><h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Detalle por Campaña (${c.length})</h3>
+<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-white/10 text-[10px] text-gray-500">
+<th class="text-left py-2">Campaña</th><th class="text-left py-2">Fecha</th><th class="text-right py-2">GMV</th><th class="text-right py-2">Desc</th><th class="text-right py-2">ROI</th><th class="text-right py-2">Mult</th><th class="text-right py-2">Post%</th><th class="text-right py-2">DS%</th><th class="text-right py-2">Tipo</th>
+</tr></thead><tbody>`;
+[...c].sort((a,b)=>b.gmv-a.gmv).forEach(r=>{
+const rc=r.roi>2.5?'text-green-400':r.roi>1.5?'text-orange-400':'text-red-400';
+const pc=r.postDeclinePct>=-10?'text-green-400':'text-red-400';
+const dc=r.dsVerdict==='GENERATION'?'text-green-400':r.dsVerdict==='DESTRUCTION'?'text-red-400':'text-orange-400';
+h+=`<tr class="border-b border-white/5 hover:bg-white/5"><td class="py-1.5 text-xs">${r.name}</td><td class="py-1.5 text-xs text-gray-400">${r.date}</td><td class="py-1.5 text-xs text-right">${F(r.gmv)}</td><td class="py-1.5 text-xs text-right text-gray-400">${F(r.discount)}</td><td class="py-1.5 text-xs text-right ${rc}">${r.roi.toFixed(1)}x</td><td class="py-1.5 text-xs text-right">${r.multiplier.toFixed(0)}x</td><td class="py-1.5 text-xs text-right ${pc}">${r.postDeclinePct>=0?'+':''}${r.postDeclinePct.toFixed(0)}%</td><td class="py-1.5 text-xs text-right ${dc}">${r.dsNetUnitsPct>=0?'+':''}${r.dsNetUnitsPct.toFixed(0)}%</td><td class="py-1.5 text-xs text-right ${dc}">${r.dsVerdict==='GENERATION'?'Gen':r.dsVerdict==='DESTRUCTION'?'Dest':'Neutro'}</td></tr>`;
+});
+h+=`</tbody></table></div></div>`;
 
-      const sorted = [...campaigns].sort((a,b) => b.gmv - a.gmv);
-      for (const c of sorted) {
-        const roiColor = c.roi > 3 ? 'text-green-400' : c.roi > 1.5 ? 'text-orange-400' : 'text-red-400';
-        const postColor = c.postDeclinePct >= -10 ? 'text-green-400' : 'text-red-400';
-        html += `<tr class="border-b border-white/5 hover:bg-white/5">
-          <td class="py-2 text-xs">${c.name.replace('VIRAL_DEAL_','')}</td>
-          <td class="py-2 text-xs text-gray-400">${c.date}</td>
-          <td class="py-2 text-xs text-right">${fmt(c.gmv)}</td>
-          <td class="py-2 text-xs text-right text-gray-400">${fmt(c.discount)}</td>
-          <td class="py-2 text-xs text-right ${roiColor}">${c.roi.toFixed(1)}x</td>
-          <td class="py-2 text-xs text-right">${c.multiplier.toFixed(0)}x</td>
-          <td class="py-2 text-xs text-right ${postColor}">${c.postDeclinePct >= 0 ? '+' : ''}${c.postDeclinePct.toFixed(0)}%</td>
-        </tr>`;
-      }
-      html += `</tbody></table></div></div>`;
+// === CONCLUSION ===
+h+=`<div class="card card-accent"><h3 class="text-sm font-bold mb-3">Conclusión del Análisis</h3>
+<p class="text-xs text-gray-300 leading-relaxed">Los virales funcionan como <strong>herramienta de activación comercial</strong>, no de crecimiento. En unidades netas el impacto es neutro (demand shift), pero generan valor a través de: basket uplift (+15%), efecto hábito (39% recompra, 58% full price), y negociaciones con makers (inversión 100% del fabricante). El principal riesgo es la canibalización post-viral (-28% promedio en venta diaria), mitigada parcialmente por la recompra a full price posterior.</p>
+</div>`;
 
-      // Insights
-      const netPositive = campaigns.filter(c => c.postDeclinePct >= -10).length;
-      const withDip = campaigns.filter(c => c.postDeclinePct < -10).length;
-      html += `<div class="card">
-        <h3 class="text-sm font-medium text-gray-400 uppercase tracking-wider mb-4">Resumen Ejecutivo</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="p-4 bg-white/5 rounded-lg"><p class="text-lg font-bold text-green-400">${netPositive}</p><p class="text-xs text-gray-400">Campañas sin canibalización significativa</p></div>
-          <div class="p-4 bg-white/5 rounded-lg"><p class="text-lg font-bold text-red-400">${withDip}</p><p class="text-xs text-gray-400">Campañas con dip post-viral &gt;10%</p></div>
-          <div class="p-4 bg-white/5 rounded-lg"><p class="text-lg font-bold text-orange-400">${fmt(kpis.totalGmv - kpis.totalDiscount)}</p><p class="text-xs text-gray-400">GMV Neto (GMV - Descuento)</p></div>
-        </div>
-      </div>`;
+document.getElementById('app').innerHTML=h;
 
-      document.getElementById('content').innerHTML = html;
-    }
-
-    loadData();
-  </script>
+// Demand Shift Chart
+const sorted=[...c].sort((a,b)=>b.dsNetUnitsPct-a.dsNetUnitsPct).slice(0,25);
+new Chart(document.getElementById('dsChart'),{type:'bar',data:{labels:sorted.map(x=>x.name.slice(0,12)),datasets:[{data:sorted.map(x=>x.dsNetUnitsPct),backgroundColor:sorted.map(x=>x.dsNetUnitsPct>5?'#10B981':x.dsNetUnitsPct<-5?'#EF4444':'#F97316'),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#9CA3AF',font:{size:8},maxRotation:45}},y:{ticks:{color:'#9CA3AF',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+}
+main().catch(e=>{document.getElementById('app').innerHTML=`<div class="card text-red-400">Error: ${e.message}</div>`});
+</script>
 </body>
 </html>

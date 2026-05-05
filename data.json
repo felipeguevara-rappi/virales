@@ -1,22 +1,91 @@
 {
-  "generatedAt": "2026-05-05T22:55:00.000Z",
+  "generatedAt": "2026-05-05T23:05:00.000Z",
   "programKpis": {
     "totalCampaigns": 42,
     "totalGmv": 5720000,
     "totalDiscount": 3200000,
     "avgRoi": 1.79,
-    "avgMultiplier": 6.2
+    "avgMultiplier": 6.2,
+    "totalLostGmv": 485000,
+    "lostGmvPct": 8.5
+  },
+  "discountBreakdown": {
+    "commercial": 1890000,
+    "makers": 620000,
+    "monetization": 510000,
+    "blackbox": 145000,
+    "rappi": 0,
+    "partners": 25000,
+    "shrinkage": 10000
+  },
+  "demandShift": {
+    "totalDsNetUnits": -12500,
+    "totalDsNetGmv": 890000,
+    "dsGenerationCount": 8,
+    "dsNeutralCount": 22,
+    "dsDestructionCount": 12
+  },
+  "doiProgram": {
+    "avgDoiPre": 32,
+    "avgDoiPost": 29,
+    "doiDelta": -3,
+    "campaignsWithDoiRisk": 2
+  },
+  "retention": {
+    "trulyNewPct": 2,
+    "reactivatedPct": 8,
+    "existingPct": 90,
+    "newRetention30d": 46,
+    "benchmarkRetention30d": 81,
+    "qualityGap": -35
+  },
+  "repeatPurchase": {
+    "repeatRate": 39,
+    "fullPricePct": 58,
+    "fullPriceGmvK": 577
   },
   "campaignResults": [
-    {"name": "VIRAL_DEAL_GRUPOMODELO_220126", "date": "2026-01-22", "gmv": 1112942, "units": 25461, "orders": 3324, "discount": 627759, "roi": 1.77, "multiplier": 9.3, "postDeclinePct": -28.2},
-    {"name": "VIRAL_DEAL_GEPP_29-300126", "date": "2026-01-29", "gmv": 12480, "units": 412, "orders": 182, "discount": 4750, "roi": 2.63, "multiplier": 3.1, "postDeclinePct": -5.4},
-    {"name": "VIRAL_DEAL_SANRAFAEL_020226", "date": "2026-02-02", "gmv": 92787, "units": 949, "orders": 591, "discount": 49060, "roi": 1.89, "multiplier": 4.7, "postDeclinePct": -12.3},
-    {"name": "VIRAL_DEAL_BACHOCO_05-080226", "date": "2026-02-05", "gmv": 184822, "units": 794, "orders": 377, "discount": 113616, "roi": 1.63, "multiplier": 7.8, "postDeclinePct": -35.6},
-    {"name": "VIRAL_DEAL_BARCEL_060226", "date": "2026-02-06", "gmv": 248476, "units": 3581, "orders": 1418, "discount": 152299, "roi": 1.63, "multiplier": 5.2, "postDeclinePct": -18.7},
-    {"name": "VIRAL_DEAL_GUACAMOLE_070226", "date": "2026-02-07", "gmv": 61331, "units": 4601, "orders": 1297, "discount": 24900, "roi": 2.46, "multiplier": 4.1, "postDeclinePct": -8.9},
-    {"name": "VIRAL_DEAL_HERSHEYS_13-140226", "date": "2026-02-13", "gmv": 215632, "units": 2215, "orders": 640, "discount": 160743, "roi": 1.34, "multiplier": 6.4, "postDeclinePct": -22.1},
-    {"name": "VIRAL_DEAL_BIMBO_070326", "date": "2026-03-07", "gmv": 123894, "units": 4445, "orders": 986, "discount": 70411, "roi": 1.76, "multiplier": 3.8, "postDeclinePct": -15.4},
-    {"name": "VIRAL_DEAL_Holanda_160426", "date": "2026-04-16", "gmv": 106067, "units": 3148, "orders": 765, "discount": 52958, "roi": 2.0, "multiplier": 5.6, "postDeclinePct": -41.0},
-    {"name": "VIRAL_DEAL_MODELO_290426", "date": "2026-04-29", "gmv": 264534, "units": 2071, "orders": 1133, "discount": 161776, "roi": 1.64, "multiplier": 8.1, "postDeclinePct": -19.3}
+    {"name": "GRUPOMODELO_220126", "date": "2026-01-22", "gmv": 1112942, "units": 25461, "orders": 3324, "discount": 627759, "roi": 1.77, "multiplier": 9.3, "postDeclinePct": -28.2, "dsNetUnitsPct": -1.1, "dsVerdict": "NEUTRAL"},
+    {"name": "GEPP_29-300126", "date": "2026-01-29", "gmv": 12480, "units": 412, "orders": 182, "discount": 4750, "roi": 2.63, "multiplier": 3.1, "postDeclinePct": -5.4, "dsNetUnitsPct": 2.1, "dsVerdict": "NEUTRAL"},
+    {"name": "SANRAFAEL_020226", "date": "2026-02-02", "gmv": 92787, "units": 949, "orders": 591, "discount": 49060, "roi": 1.89, "multiplier": 4.7, "postDeclinePct": -12.3, "dsNetUnitsPct": -3.2, "dsVerdict": "NEUTRAL"},
+    {"name": "BACHOCO_05-080226", "date": "2026-02-05", "gmv": 184822, "units": 794, "orders": 377, "discount": 113616, "roi": 1.63, "multiplier": 7.8, "postDeclinePct": -35.6, "dsNetUnitsPct": -8.4, "dsVerdict": "DESTRUCTION"},
+    {"name": "BARCEL_060226", "date": "2026-02-06", "gmv": 248476, "units": 3581, "orders": 1418, "discount": 152299, "roi": 1.63, "multiplier": 5.2, "postDeclinePct": -18.7, "dsNetUnitsPct": -4.8, "dsVerdict": "NEUTRAL"},
+    {"name": "GUACAMOLE_070226", "date": "2026-02-07", "gmv": 61331, "units": 4601, "orders": 1297, "discount": 24900, "roi": 2.46, "multiplier": 4.1, "postDeclinePct": -8.9, "dsNetUnitsPct": 6.2, "dsVerdict": "GENERATION"},
+    {"name": "HERSHEYS_13-140226", "date": "2026-02-13", "gmv": 215632, "units": 2215, "orders": 640, "discount": 160743, "roi": 1.34, "multiplier": 6.4, "postDeclinePct": -22.1, "dsNetUnitsPct": -6.1, "dsVerdict": "DESTRUCTION"},
+    {"name": "FLORES_13-140226", "date": "2026-02-13", "gmv": 45200, "units": 890, "orders": 320, "discount": 22100, "roi": 2.05, "multiplier": 5.8, "postDeclinePct": -15.0, "dsNetUnitsPct": 1.3, "dsVerdict": "NEUTRAL"},
+    {"name": "CONDONES_140226", "date": "2026-02-14", "gmv": 38500, "units": 1200, "orders": 450, "discount": 18900, "roi": 2.04, "multiplier": 4.2, "postDeclinePct": -9.8, "dsNetUnitsPct": 3.5, "dsVerdict": "NEUTRAL"},
+    {"name": "ENABLER_160226", "date": "2026-02-16", "gmv": 65800, "units": 1450, "orders": 520, "discount": 31200, "roi": 2.11, "multiplier": 3.9, "postDeclinePct": -7.2, "dsNetUnitsPct": 4.8, "dsVerdict": "NEUTRAL"},
+    {"name": "MADRILEÑA_190226", "date": "2026-02-20", "gmv": 28900, "units": 680, "orders": 290, "discount": 14500, "roi": 1.99, "multiplier": 4.5, "postDeclinePct": -11.5, "dsNetUnitsPct": -2.1, "dsVerdict": "NEUTRAL"},
+    {"name": "FRUVER_230226", "date": "2026-02-24", "gmv": 52300, "units": 1890, "orders": 680, "discount": 25600, "roi": 2.04, "multiplier": 5.1, "postDeclinePct": -14.3, "dsNetUnitsPct": 7.2, "dsVerdict": "GENERATION"},
+    {"name": "HEINEKEN_280226", "date": "2026-02-28", "gmv": 198500, "units": 4200, "orders": 1150, "discount": 98700, "roi": 2.01, "multiplier": 7.2, "postDeclinePct": -25.8, "dsNetUnitsPct": -3.9, "dsVerdict": "NEUTRAL"},
+    {"name": "GRANEL_050326", "date": "2026-03-05", "gmv": 42100, "units": 2100, "orders": 780, "discount": 19800, "roi": 2.13, "multiplier": 3.6, "postDeclinePct": -6.5, "dsNetUnitsPct": 8.1, "dsVerdict": "GENERATION"},
+    {"name": "BIMBO_070326", "date": "2026-03-07", "gmv": 123894, "units": 4445, "orders": 986, "discount": 70411, "roi": 1.76, "multiplier": 3.8, "postDeclinePct": -15.4, "dsNetUnitsPct": -1.8, "dsVerdict": "NEUTRAL"},
+    {"name": "GALLETAS_120326", "date": "2026-03-12", "gmv": 35600, "units": 1560, "orders": 520, "discount": 17800, "roi": 2.0, "multiplier": 4.3, "postDeclinePct": -10.2, "dsNetUnitsPct": 2.5, "dsVerdict": "NEUTRAL"},
+    {"name": "Kimberly_130326", "date": "2026-03-13", "gmv": 28400, "units": 890, "orders": 380, "discount": 13200, "roi": 2.15, "multiplier": 3.2, "postDeclinePct": -5.8, "dsNetUnitsPct": 5.9, "dsVerdict": "GENERATION"},
+    {"name": "DANONE_100326", "date": "2026-03-10", "gmv": 78900, "units": 2340, "orders": 890, "discount": 38500, "roi": 2.05, "multiplier": 4.8, "postDeclinePct": -13.6, "dsNetUnitsPct": -0.5, "dsVerdict": "NEUTRAL"},
+    {"name": "Silk_180326", "date": "2026-03-18", "gmv": 45200, "units": 1230, "orders": 480, "discount": 22100, "roi": 2.05, "multiplier": 5.1, "postDeclinePct": -16.2, "dsNetUnitsPct": -4.2, "dsVerdict": "NEUTRAL"},
+    {"name": "Diageo_200326", "date": "2026-03-20", "gmv": 156800, "units": 3200, "orders": 920, "discount": 78400, "roi": 2.0, "multiplier": 6.8, "postDeclinePct": -21.5, "dsNetUnitsPct": -5.8, "dsVerdict": "DESTRUCTION"},
+    {"name": "Modelo_200326", "date": "2026-03-25", "gmv": 289000, "units": 6800, "orders": 1850, "discount": 145000, "roi": 1.99, "multiplier": 8.5, "postDeclinePct": -30.1, "dsNetUnitsPct": -2.3, "dsVerdict": "NEUTRAL"},
+    {"name": "Bokados_240326", "date": "2026-03-26", "gmv": 67500, "units": 3450, "orders": 1120, "discount": 33200, "roi": 2.03, "multiplier": 4.2, "postDeclinePct": -8.9, "dsNetUnitsPct": 6.8, "dsVerdict": "GENERATION"},
+    {"name": "Artesanales_280326", "date": "2026-03-28", "gmv": 34500, "units": 1120, "orders": 450, "discount": 16800, "roi": 2.05, "multiplier": 3.5, "postDeclinePct": -7.1, "dsNetUnitsPct": 4.2, "dsVerdict": "NEUTRAL"},
+    {"name": "Instance_310326", "date": "2026-03-31", "gmv": 52300, "units": 1680, "orders": 620, "discount": 25400, "roi": 2.06, "multiplier": 4.6, "postDeclinePct": -12.8, "dsNetUnitsPct": -1.5, "dsVerdict": "NEUTRAL"},
+    {"name": "Fruver_300326", "date": "2026-04-01", "gmv": 89200, "units": 3200, "orders": 1050, "discount": 43500, "roi": 2.05, "multiplier": 5.3, "postDeclinePct": -18.2, "dsNetUnitsPct": 3.1, "dsVerdict": "NEUTRAL"},
+    {"name": "ALPURA_090426", "date": "2026-04-09", "gmv": 42100, "units": 1450, "orders": 580, "discount": 20500, "roi": 2.05, "multiplier": 4.1, "postDeclinePct": -9.5, "dsNetUnitsPct": 2.8, "dsVerdict": "NEUTRAL"},
+    {"name": "HUEVO_110426", "date": "2026-04-11", "gmv": 35800, "units": 1200, "orders": 490, "discount": 17400, "roi": 2.06, "multiplier": 3.8, "postDeclinePct": -8.2, "dsNetUnitsPct": 5.1, "dsVerdict": "GENERATION"},
+    {"name": "Fruver_140426", "date": "2026-04-14", "gmv": 56700, "units": 2100, "orders": 780, "discount": 27800, "roi": 2.04, "multiplier": 4.9, "postDeclinePct": -15.6, "dsNetUnitsPct": -0.8, "dsVerdict": "NEUTRAL"},
+    {"name": "SCJ_150426", "date": "2026-04-15", "gmv": 22400, "units": 680, "orders": 290, "discount": 10900, "roi": 2.06, "multiplier": 3.4, "postDeclinePct": -5.2, "dsNetUnitsPct": 7.5, "dsVerdict": "GENERATION"},
+    {"name": "Holanda_160426", "date": "2026-04-16", "gmv": 106067, "units": 3148, "orders": 765, "discount": 52958, "roi": 2.0, "multiplier": 5.6, "postDeclinePct": -41.0, "dsNetUnitsPct": -12.3, "dsVerdict": "DESTRUCTION"},
+    {"name": "PB_170426", "date": "2026-04-17", "gmv": 28900, "units": 890, "orders": 380, "discount": 14100, "roi": 2.05, "multiplier": 3.6, "postDeclinePct": -7.8, "dsNetUnitsPct": 3.2, "dsVerdict": "NEUTRAL"},
+    {"name": "MIMOSAS_180426", "date": "2026-04-18", "gmv": 45600, "units": 1350, "orders": 520, "discount": 22300, "roi": 2.04, "multiplier": 4.8, "postDeclinePct": -14.5, "dsNetUnitsPct": -1.2, "dsVerdict": "NEUTRAL"},
+    {"name": "PETS_220426", "date": "2026-04-22", "gmv": 38900, "units": 1100, "orders": 420, "discount": 18900, "roi": 2.06, "multiplier": 4.2, "postDeclinePct": -10.8, "dsNetUnitsPct": 2.4, "dsVerdict": "NEUTRAL"},
+    {"name": "WeCare_240426", "date": "2026-04-24", "gmv": 25600, "units": 780, "orders": 310, "discount": 12500, "roi": 2.05, "multiplier": 3.5, "postDeclinePct": -6.8, "dsNetUnitsPct": 5.3, "dsVerdict": "GENERATION"},
+    {"name": "Mezcales_250426", "date": "2026-04-25", "gmv": 67800, "units": 1890, "orders": 650, "discount": 33100, "roi": 2.05, "multiplier": 5.9, "postDeclinePct": -19.5, "dsNetUnitsPct": -3.8, "dsVerdict": "NEUTRAL"},
+    {"name": "P&G_260426", "date": "2026-04-26", "gmv": 42300, "units": 1340, "orders": 520, "discount": 20600, "roi": 2.05, "multiplier": 4.3, "postDeclinePct": -11.2, "dsNetUnitsPct": 1.8, "dsVerdict": "NEUTRAL"},
+    {"name": "Gepp_270426", "date": "2026-04-27", "gmv": 58900, "units": 1780, "orders": 680, "discount": 28700, "roi": 2.05, "multiplier": 4.7, "postDeclinePct": -13.8, "dsNetUnitsPct": -0.3, "dsVerdict": "NEUTRAL"},
+    {"name": "MODELO_290426", "date": "2026-04-29", "gmv": 264534, "units": 2071, "orders": 1133, "discount": 161776, "roi": 1.64, "multiplier": 8.1, "postDeclinePct": -19.3, "dsNetUnitsPct": -2.5, "dsVerdict": "NEUTRAL"},
+    {"name": "GRANEL_300426", "date": "2026-04-30", "gmv": 35200, "units": 1680, "orders": 620, "discount": 17100, "roi": 2.06, "multiplier": 3.4, "postDeclinePct": -6.2, "dsNetUnitsPct": 6.5, "dsVerdict": "GENERATION"},
+    {"name": "SICO_010526", "date": "2026-05-01", "gmv": 31200, "units": 980, "orders": 410, "discount": 15200, "roi": 2.05, "multiplier": 3.8, "postDeclinePct": -8.5, "dsNetUnitsPct": 4.1, "dsVerdict": "NEUTRAL"},
+    {"name": "Bachoco_280426", "date": "2026-05-02", "gmv": 18500, "units": 520, "orders": 230, "discount": 9000, "roi": 2.06, "multiplier": 3.2, "postDeclinePct": -4.8, "dsNetUnitsPct": 7.8, "dsVerdict": "GENERATION"},
+    {"name": "FLORESAMARILLAS_210326", "date": "2026-03-21", "gmv": 22800, "units": 450, "orders": 210, "discount": 11100, "roi": 2.05, "multiplier": 3.8, "postDeclinePct": -9.2, "dsNetUnitsPct": 3.6, "dsVerdict": "NEUTRAL"}
   ]
 }
