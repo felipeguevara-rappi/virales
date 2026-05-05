@@ -45,16 +45,52 @@ const F=n=>n>=1e6?`$${(n/1e6).toFixed(1)}M`:n>=1e3?`$${(n/1e3).toFixed(0)}K`:`$$
 
 async function main(){
 const [exec, camp] = await Promise.all([fetch('./data.json').then(r=>r.json()), fetch('./campaign-data.json').then(r=>r.json())]);
+window._execData=exec;
+window._campData=camp;
 document.getElementById('ts').textContent=`Actualizado: ${new Date(exec.generatedAt).toLocaleString('es-MX')}`;
 renderCampaign(camp);
 renderExecutive(exec);
 renderPlaybook();
 }
 
+function selectCampaign(idx){
+const c=window._execData.campaignResults[idx];
+// For detailed view, only Modelo has full data. For others show KPIs from executive
+const el=document.getElementById('tab-campaign-content');
+const allCampaigns=window._execData.campaignResults;
+let h=`<div class="mb-6"><select id="campaignSelect" onchange="selectCampaign(this.value)" class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white w-full max-w-lg focus:outline-none focus:border-orange-500">`;
+allCampaigns.forEach((camp,i)=>{h+=`<option value="${i}" ${i==idx?'selected':''}>${camp.name} — ${camp.date} | GMV ${F(camp.gmv)}</option>`;});
+h+=`</select></div>`;
+h+=`<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+<div class="card text-center"><p class="text-xl font-bold text-orange-400">${F(c.gmv)}</p><p class="text-[10px] text-gray-400">GMV (sin IVA)</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-purple-400">${(c.orders||0).toLocaleString()} / ${(c.units||0).toLocaleString()}</p><p class="text-[10px] text-gray-400">Órdenes / Units</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-red-400">${F(c.discount)}</p><p class="text-[10px] text-gray-400">Inversión Desc</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-green-400">${c.roi.toFixed(1)}x</p><p class="text-[10px] text-gray-400">ROI</p></div>
+<div class="card text-center"><p class="text-xl font-bold text-purple-400">${c.multiplier.toFixed(0)}x</p><p class="text-[10px] text-gray-400">Multiplicador</p></div>
+</div>`;
+h+=`<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="card"><p class="text-xs text-gray-400">Post-Viral Decline</p><p class="text-2xl font-bold ${c.postDeclinePct<-10?'text-red-400':'text-green-400'}">${c.postDeclinePct>=0?'+':''}${c.postDeclinePct.toFixed(0)}%</p></div>
+<div class="card"><p class="text-xs text-gray-400">Demand Shift (Net Units)</p><p class="text-2xl font-bold ${c.dsVerdict==='GENERATION'?'text-green-400':c.dsVerdict==='DESTRUCTION'?'text-red-400':'text-orange-400'}">${c.dsNetUnitsPct>=0?'+':''}${c.dsNetUnitsPct.toFixed(1)}% — ${c.dsVerdict}</p></div>
+</div>`;
+if(c.name==='GRUPOMODELO_220126'){h+=`<p class="text-xs text-green-400 mb-4">✓ Datos detallados disponibles para esta campaña (canibalización, retención, stock, productos)</p>`;renderCampaign(window._campData);return;}
+else{h+=`<p class="text-xs text-gray-500 italic">Datos detallados (canibalización, retención, DOI, productos) disponibles solo al seleccionar GRUPOMODELO. Para las demás se muestran KPIs del executive.</p>`;}
+el.innerHTML=h;
+}
+
 function renderCampaign(d){
 const el=document.getElementById('tab-campaign-content');
+const allCampaigns=window._execData?.campaignResults||[];
 const imp=d.impact, can=d.cannibalization, ret=d.retention, pd=d.postDemand, st=d.stockout, cb=d.crossBasket, prod=d.products, rp=d.repeatPurchase, ds=d.demandShift;
-let h=`<p class="text-sm text-gray-400 mb-4">Mostrando: <span class="text-orange-400 font-medium">${d.sampleCampaign}</span></p>`;
+
+// Dropdown
+let h=`<div class="mb-6"><select id="campaignSelect" onchange="selectCampaign(this.value)" class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white w-full max-w-lg focus:outline-none focus:border-orange-500">`;
+allCampaigns.forEach((c,i)=>{h+=`<option value="${i}" ${c.name===d.sampleCampaign?.replace('VIRAL_DEAL_','')? 'selected':''}>${c.name.replace('VIRAL_DEAL_','')} — ${c.date} | GMV ${F(c.gmv)}</option>`;});
+h+=`</select></div>`;
+
+// If we have detailed data (Modelo), show full view. Otherwise show KPIs from executive data
+const selectedIdx=document.getElementById('campaignSelect')?.value||0;
+const selCamp=allCampaigns[selectedIdx]||allCampaigns[0]||{};
+const hasDetail=!!imp;
 
 // KPIs
 h+=`<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
