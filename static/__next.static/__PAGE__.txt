@@ -3,7 +3,7 @@
 3:I[15311,["/virales/_next/static/chunks/0o~269zocnb95.js","/virales/_next/static/chunks/0-ca5m4mg~enb.js"],"default"]
 6:I[97367,["/virales/_next/static/chunks/0o~269zocnb95.js"],"OutletBoundary"]
 7:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/virales/_next/static/chunks/0-ca5m4mg~enb.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"4Q3cteqq6S4HnV1BFaXZT"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"Component":"$3","serverProvidedParams":{"searchParams":{},"params":{},"promises":["$@4","$@5"]}}],[["$","script","script-0",{"src":"/virales/_next/static/chunks/0-ca5m4mg~enb.js","async":true}]],["$","$L6",null,{"children":["$","$7",null,{"name":"Next.MetadataOutlet","children":"$@8"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"RC62GA_XPHZMbfW0hAIV-"}
 4:{}
 5:"$0:rsc:props:children:0:props:serverProvidedParams:params"
 8:null
